@@ -37,6 +37,8 @@
     <div id="fixed-tooltip"></div>
     <h1>Mouse tooltip</h1>
     <div id="mouse-tooltip"></div>
+    <h1>Show</h1>
+    <div id="show-tooltip"></div>
 </div>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="../d3tooltip.js"></script>
@@ -50,11 +52,12 @@
     var color = d3.scale.ordinal()
             .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
+    var y = d3.scale.linear().range([height, 0]);
+    var x = d3.scale.linear().range([0, width]);
+
     // Bar Chart
     var x0 = d3.scale.ordinal().rangeRoundBands([0, width], .1);
     var x1 = d3.scale.ordinal();
-
-    var y = d3.scale.linear().range([height, 0]);
 
     var xAxis = d3.svg.axis()
             .scale(x0)
@@ -176,5 +179,94 @@
                         content: "<p>Age: " + d.data.age + "<br/>Population: " + d.data.population + "</p>"
                     }
                 })
+    });
+
+    // Scatter plot
+    var scatterColor = d3.scale.category10();
+
+    var scatterXAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+    var scatterYAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+
+    var scatter = d3.select("#show-tooltip").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.tsv("scatter.tsv", function(error, data) {
+        data.forEach(function(d) {
+            d.sepalLength = +d.sepalLength;
+            d.sepalWidth = +d.sepalWidth;
+        });
+
+        x.domain(d3.extent(data, function(d) { return d.sepalWidth; })).nice();
+        y.domain(d3.extent(data, function(d) { return d.sepalLength; })).nice();
+
+        scatter.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(scatterXAxis)
+                .append("text")
+                .attr("class", "label")
+                .attr("x", width)
+                .attr("y", -6)
+                .style("text-anchor", "end")
+                .text("Sepal Width (cm)");
+
+        scatter.append("g")
+                .attr("class", "y axis")
+                .call(scatterYAxis)
+                .append("text")
+                .attr("class", "label")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Sepal Length (cm)")
+
+        scatter.selectAll(".dot")
+                .data(data)
+                .enter().append("circle")
+                .attr("class", "dot")
+                .attr("r", 3.5)
+                .attr("cx", function(d) { return x(d.sepalWidth); })
+                .attr("cy", function(d) { return y(d.sepalLength); })
+                .style("fill", function(d) { return scatterColor(d.species); })
+                .tooltip(function(d,i) {
+                    return {
+                        type: "fixed",
+                        gravity: "bottom",
+                        displacement: [0,5],
+                        content: "<p>" + d.species + "</p>",
+                        show: function() {
+                            return d.species == "virginica";
+                        }
+                    }
+                });
+
+        var legend = scatter.selectAll(".legend")
+                .data(scatterColor.domain())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+        legend.append("rect")
+                .attr("x", width - 18)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", scatterColor);
+
+        legend.append("text")
+                .attr("x", width - 24)
+                .attr("y", 9)
+                .attr("dy", ".35em")
+                .style("text-anchor", "end")
+                .text(function(d) { return d; });
+
     });
 </script>
