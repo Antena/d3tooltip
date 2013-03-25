@@ -58,7 +58,7 @@
         if (options.type == "mouse") {
             if (options.show()) {
                 element.on("mousemove", function() {
-                    var tip = d3.selectAll("." + options.class);
+                    var tip = d3.selectAll("." + options.cssClass);
                     var coordinates = calculateCoordinates(tip);
                     tip
                         .style("left", coordinates[0] + "px")
@@ -69,7 +69,7 @@
 
         element.on("mouseout", function() {
             if (options.show()) {
-                var tip = d3.selectAll("." + options.class);
+                var tip = d3.selectAll("." + options.cssClass);
                 tip.remove();
             }
         });
@@ -88,17 +88,27 @@
             if (!options.updateContent) {
                 options.updateContent = function() { };
             }
+            if (!options.displacement) {
+                options.displacement = [0,0];
+            }
+            if (!options.cssClass) {
+                options.cssClass = "tooltip";
+            }
+            if (!options.gravity) {
+                options.gravity = "right";
+            }
             create_tooltip = function() {
                 var tip = body.append("div")
-                    .classed(options.class, true)
+                    .classed(options.cssClass, true)
                     .style("position", "absolute")
                     .style("z-index", "10001")
                     .style("display", "block")
                     .style("pointer-events", "none");
-                tip
-                    .append("div")
+
+                tip.append("div")
                     .html(options.content)
-                    .attr("class", "inner")
+                    .attr("class", "inner");
+
                 return tip;
             }
 
