@@ -1,11 +1,13 @@
 d3tooltip
 =========
+d3 generic tooltips.
+
 
 # Usage
 **d3tooltip** is designed as an extension to `d3.selection`, thus the `tooltip()` function can be applied to any selection.
 Here's how:
 ```javascript
-mySelection.tooltip:function(d,i) {
+mySelection.tooltip(function(d,i) {
     // Here is where you would build the content for your tooltip.
     // Keep in mind you have access to the datum d and its index i of the selection that will trigger the tooltip.
     return {
@@ -17,7 +19,7 @@ mySelection.tooltip:function(d,i) {
         show: function() { return true },   // Optional: a function returning a boolean to determine if the tooltip should appear.
         updateContent: function() {},       // Optional: a function to dynamically alter the tooltip's content after initialization. This will be run everytime the tooltip is created.
     }
-}
+})
 ```
 
 This will create a tooltip on `mouseover`, move it on `mouseover` (if `type` is `'mouse'`) and remove it on `mouseout`.
@@ -29,3 +31,7 @@ The structure of the created tooltip is:
             <!--THE TOOLTIP'S CONTENT-->
         </div>
     </div>
+
+
+# Acknowledgments
+Strongly based on [d3-bootstrap-plugins](https://github.com/zmaril/d3-bootstrap-plugins)
